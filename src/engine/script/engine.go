@@ -195,6 +195,22 @@ func (e *ScriptEngine) registerBuiltins() {
 	e.globals["get_state"] = starlark.NewBuiltin("get_state", e.getState)
 	e.globals["set_states"] = starlark.NewBuiltin("set_states", e.setStates)
 	e.globals["get_states"] = starlark.NewBuiltin("get_states", e.getStates)
+
+	// loadコマンドを追加
+	e.thread.Load = func(thread *starlark.Thread, module string) (starlark.StringDict, error) {
+		data, err := ioutil.ReadFile(module)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read module %s: %v", module, err)
+		}
+
+		// モジュールを実行し、グローバル変数を取得
+		globals, err := starlark.ExecFile(thread, module, data, e.globals)
+		if err != nil {
+			return nil, err
+		}
+
+		return globals, nil
+	}
 }
 
 // エンティティ作成

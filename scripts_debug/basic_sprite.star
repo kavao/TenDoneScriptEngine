@@ -128,6 +128,8 @@ def get_bullets():
 print("Starting initialization") # デバッグ出力
 
 def init():
+    # 画面設定の初期化
+    init_screen("FULLHD")
     # プレイヤーエンティティの作成
     vars["player_id"] = create_entity()
     print("Created player entity:", vars["player_id"])
@@ -172,6 +174,8 @@ def init():
     })
 
 print("Initialization complete")
+# 設定の読み込み
+load("scripts_debug/config.star", "init_screen")  # 必要な関数だけをインポート
 init()  # init()を直接呼び出す 
 
 # オブジェクトの状態を設定
@@ -180,4 +184,5 @@ set_state(vars["player_id"], "score", 0)
 
 # 状態を取得
 health = get_state(vars["player_id"], "health")
-score = get_state(vars["player_id"], "score") 
+score = get_state(vars["player_id"], "score")
+
