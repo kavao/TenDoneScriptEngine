@@ -1,0 +1,46 @@
+# バイナリ
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# テスト
+*.test
+*.tmp
+
+# Go特有
+*.o
+*.a
+_obj
+_test
+_testmain.go
+
+# 出力ディレクトリ
+bin/
+build/
+
+# IDEの設定
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS固有
+.DS_Store
+Thumbs.db
+
+# デバッグファイル
+debug
+*.log
+
+# 一時ファイル
+tmp/
+temp/
+
+# 依存関係
+vendor/
+
+# ビルドキャッシュ
+*.sum 

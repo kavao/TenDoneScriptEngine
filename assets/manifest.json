@@ -1,0 +1,38 @@
+{
+  "images": {
+    "player": {
+      "path": "images/characters/player.png"
+    },
+    "background": {
+      "path": "images/backgrounds/title.png"
+    }
+  },
+  "audio": {
+    "bgm_title": {
+      "path": "audio/bgm/title.ogg",
+      "type": "bgm"
+    },
+    "se_attack": {
+      "path": "audio/se/attack.ogg",
+      "type": "se"
+    }
+  },
+  "fonts": {
+    "main": {
+      "path": "fonts/NotoSansJP-Regular.ttf",
+      "size": 18
+    },
+    "title": {
+      "path": "fonts/NotoSansJP-Bold.ttf",
+      "size": 24
+    }
+  },
+  "scripts": {
+    "title_scene": {
+      "path": "scripts/scenes/title.star"
+    },
+    "battle_logic": {
+      "path": "scripts/logic/battle.star"
+    }
+  }
+} 
