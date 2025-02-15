@@ -307,6 +307,21 @@ set_state(player_id, "health", 100)
 set_state(player_id, "name", "Player 1")
 ```
 
+### set_states(entity_id, states)
+エンティティの複数の状態値を一度に設定します。
+- 引数:
+  - entity_id: エンティティID（整数）
+  - states: 状態の辞書（キーは文字列、値は数値/文字列/真偽値）
+- 戻り値: なし
+- 例:
+```python
+set_states(player_id, {
+    "health": 100,
+    "score": 0,
+    "is_active": True
+})
+```
+
 ### get_state(entity_id, key)
 エンティティの状態値を取得します。
 - 引数:
@@ -318,4 +333,17 @@ set_state(player_id, "name", "Player 1")
 health = get_state(player_id, "health")
 if health > 0:
     # プレイヤーが生存している場合の処理
-``` 
+```
+
+### get_states(entity_id, keys)
+エンティティの複数の状態値を一度に取得します。
+- 引数:
+  - entity_id: エンティティID（整数）
+  - keys: 取得したい状態のキーのリスト（文字列のリスト）
+- 戻り値: キーと値のペアを含む辞書
+- 例:
+```python
+states = get_states(player_id, ["health", "score", "shot_cooldown"])
+if states["health"] > 0:
+    print("Player health:", states["health"])
+```

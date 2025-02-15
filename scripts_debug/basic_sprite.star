@@ -13,7 +13,6 @@ def update():
         print("Warning: Player transform not found")
         return
 
-    # print("Current position:", transform["x"], transform["y"]) # デバッグ出力
     speed = 8.0
     x = transform["x"]
     y = transform["y"]
@@ -45,7 +44,6 @@ def update():
             y = 600-32
 
     if moved:
-        print("Moving to:", x, y) # デバッグ出力
         set_component(vars["player_id"], "transform", {
             "x": x,
             "y": y
@@ -67,14 +65,20 @@ def update():
         set_state(vars["player_id"], "shot_cooldown", cooldown - 1)
 
     # 統計情報の更新
-    stats_text_component = get_component(vars["stats_text_id"], "text")
-    if not stats_text_component:
-        print("Warning: Stats text component not found")
-        return
-
     bullets = get_bullets()
     total_entities = get_total_entities()
-    print("Debug - Total entities:", total_entities, "Bullets:", len(bullets))  # デバッグ出力
+    # print("Debug - Total entities:", total_entities, "Bullets:", len(bullets))
+
+    # テキストコンポーネントの動的更新
+    if vars["stats_text_id"] == None:
+        vars["stats_text_id"] = create_entity()
+        add_component(vars["stats_text_id"], "text", {
+            "text": "",
+            "x": 600,
+            "y": 550
+        })
+
+    # 毎フレーム統計情報を更新
     stats_text = "Objects: " + str(total_entities) + " | Bullets: " + str(len(bullets))
     set_component(vars["stats_text_id"], "text", {
         "text": stats_text,
@@ -86,13 +90,13 @@ print("Update function defined") # デバッグ出力
 
 def create_bullet(x, y):
     bullet_id = create_entity()
-    print("Creating bullet with ID:", bullet_id)
+    # print("Creating bullet with ID:", bullet_id)
     add_tag(bullet_id, "bullet")
-    print("Added 'bullet' tag to entity:", bullet_id)
+    # print("Added 'bullet' tag to entity:", bullet_id)
     
     # タグが正しく追加されたか確認
     bullets = find_entities_by_tag("bullet")
-    print("Current bullet count:", len(bullets))
+    # print("Current bullet count:", len(bullets))
     
     # 弾のTransform
     add_component(bullet_id, "transform", {
@@ -160,13 +164,14 @@ def init():
     })
     print("Added text component to stats entity")  # デバッグ出力を追加
 
-    # 初期状態の設定
-    set_state(vars["player_id"], "shot_cooldown", 0)
-    set_state(vars["player_id"], "health", 100)
-    set_state(vars["player_id"], "score", 0)
+    # 初期状態をまとめて設定
+    set_states(vars["player_id"], {
+        "shot_cooldown": 0,
+        "health": 100,
+        "score": 0
+    })
 
-print("Initialization complete") # デバッグ出力
-
+print("Initialization complete")
 init()  # init()を直接呼び出す 
 
 # オブジェクトの状態を設定

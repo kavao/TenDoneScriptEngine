@@ -1,18 +1,17 @@
 package ecs
 
 import (
-	"fmt"
 	"sort"
 	"sync"
 )
 
 // ワールド
 type World struct {
-	mutex     sync.RWMutex
-	entities  map[EntityID]*Entity  // マップを使用してエンティティを保存
-	systems   []System
-	toAdd     []*Entity
-	toRemove  []EntityID
+	mutex        sync.RWMutex
+	entities     map[EntityID]*Entity // マップを使用してエンティティを保存
+	systems      []System
+	toAdd        []*Entity
+	toRemove     []EntityID
 	nextEntityID EntityID
 }
 
@@ -37,7 +36,7 @@ func (w *World) CreateEntity() *Entity {
 		tags:       make(map[string]bool),
 		active:     true,
 	}
-	w.entities[entity.GetID()] = entity  // 即座にマップに追加
+	w.entities[entity.GetID()] = entity // 即座にマップに追加
 	w.nextEntityID++
 	return entity
 }
@@ -118,7 +117,7 @@ func (w *World) entityComponentAdded(entity *Entity, component Component) {
 				break
 			}
 		}
-		
+
 		if hasAllComponents {
 			system.OnEntityAdded(entity)
 		}
@@ -141,8 +140,8 @@ func (w *World) FindEntitiesByTag(tag string) []*Entity {
 
 	var entities []*Entity
 	for _, entity := range w.entities {
-		fmt.Printf("Checking entity %d for tag '%s': active=%v, hasTag=%v\n",
-			entity.GetID(), tag, entity.IsActive(), entity.HasTag(tag))
+		// fmt.Printf("Checking entity %d for tag '%s': active=%v, hasTag=%v\n",
+		// 	entity.GetID(), tag, entity.IsActive(), entity.HasTag(tag))
 		if entity.IsActive() && entity.HasTag(tag) {
 			entities = append(entities, entity)
 		}

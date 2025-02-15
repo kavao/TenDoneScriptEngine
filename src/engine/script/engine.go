@@ -193,13 +193,15 @@ func (e *ScriptEngine) registerBuiltins() {
 	e.globals["get_total_entities"] = starlark.NewBuiltin("get_total_entities", e.getTotalEntities)
 	e.globals["set_state"] = starlark.NewBuiltin("set_state", e.setState)
 	e.globals["get_state"] = starlark.NewBuiltin("get_state", e.getState)
+	e.globals["set_states"] = starlark.NewBuiltin("set_states", e.setStates)
+	e.globals["get_states"] = starlark.NewBuiltin("get_states", e.getStates)
 }
 
 // エンティティ作成
 func (e *ScriptEngine) createEntity(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-	fmt.Printf("Creating entity in World %p\n", e.world) // デバッグ出力を追加
+	// fmt.Printf("Creating entity in World %p\n", e.world) // デバッグ出力を追加
 	entity := e.world.CreateEntity()
-	fmt.Printf("Created entity %d in World %p\n", entity.GetID(), e.world)
+	// fmt.Printf("Created entity %d in World %p\n", entity.GetID(), e.world)
 	return starlark.MakeInt64(int64(entity.GetID())), nil
 }
 
@@ -379,13 +381,9 @@ func (e *ScriptEngine) findEntitiesByTag(thread *starlark.Thread, b *starlark.Bu
 		return nil, err
 	}
 
-	fmt.Printf("Searching for entities with tag: %s\n", tag)
 	entities := e.world.FindEntitiesByTag(tag)
-	fmt.Printf("Found %d entities with tag %s\n", len(entities), tag)
-
 	result := make([]starlark.Value, len(entities))
 	for i, entity := range entities {
-		fmt.Printf("Entity %d has tag %s: %v\n", entity.GetID(), tag, entity.HasTag(tag))
 		result[i] = starlark.MakeInt64(int64(entity.GetID()))
 	}
 	return starlark.NewList(result), nil
@@ -432,9 +430,9 @@ func (e *ScriptEngine) isKeyPressed(thread *starlark.Thread, b *starlark.Builtin
 	}
 
 	result := ebiten.IsKeyPressed(key)
-	if result {
-		fmt.Printf("Key %s is pressed\n", keyName)
-	}
+	// if result {
+	// 	fmt.Printf("Key %s is pressed\n", keyName)
+	// }
 	return starlark.Bool(result), nil
 }
 
@@ -579,4 +577,82 @@ func (e *ScriptEngine) getState(thread *starlark.Thread, b *starlark.Builtin, ar
 	}
 
 	return goValue, nil
+}
+
+func (e *ScriptEngine) setStates(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+	var entityID int64
+	var statesDict *starlark.Dict
+	if err := starlark.UnpackPositionalArgs(b.Name(), args, kwargs, 2, &entityID, &statesDict); err != nil {
+		return nil, err
+	}
+
+	// Starlark辞書をGoのmapに変換
+	states := make(map[string]interface{})
+	for _, item := range statesDict.Items() {
+		key, ok := item[0].(starlark.String)
+		if !ok {
+			return nil, fmt.Errorf("key must be string, got %s", item[0].Type())
+		}
+
+		// 値の型変換
+		var value interface{}
+		switch v := item[1].(type) {
+		case starlark.Int:
+			value, _ = v.Int64()
+		case starlark.Float:
+			value = float64(v)
+		case starlark.String:
+			value = string(v)
+		case starlark.Bool:
+			value = bool(v)
+		default:
+			return nil, fmt.Errorf("unsupported value type: %s", item[1].Type())
+		}
+		states[string(key)] = value
+	}
+
+	e.stateManager.SetStates(ecs.EntityID(entityID), states)
+	return starlark.None, nil
+}
+
+func (e *ScriptEngine) getStates(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+	var entityID int64
+	var keysList *starlark.List
+	if err := starlark.UnpackPositionalArgs(b.Name(), args, kwargs, 2, &entityID, &keysList); err != nil {
+		return nil, err
+	}
+
+	// キーのリストをGo形式に変換
+	keys := make([]string, 0, keysList.Len())
+	for i := 0; i < keysList.Len(); i++ {
+		key, ok := keysList.Index(i).(starlark.String)
+		if !ok {
+			return nil, fmt.Errorf("key must be string, got %s", keysList.Index(i).Type())
+		}
+		keys = append(keys, string(key))
+	}
+
+	// 状態を取得
+	states := e.stateManager.GetStates(ecs.EntityID(entityID), keys)
+
+	// 結果をStarlark辞書に変換
+	result := starlark.NewDict(len(states))
+	for key, value := range states {
+		var starlarkValue starlark.Value
+		switch v := value.(type) {
+		case int64:
+			starlarkValue = starlark.MakeInt64(v)
+		case float64:
+			starlarkValue = starlark.Float(v)
+		case string:
+			starlarkValue = starlark.String(v)
+		case bool:
+			starlarkValue = starlark.Bool(v)
+		default:
+			continue
+		}
+		result.SetKey(starlark.String(key), starlarkValue)
+	}
+
+	return result, nil
 }
