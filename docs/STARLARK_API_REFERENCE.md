@@ -1,4 +1,150 @@
-# Starlark API リファレンス
+# Starlark API Reference
+
+## エンティティ管理
+
+### create_entity()
+新しいエンティティを作成します。
+- 引数: なし
+- 戻り値: エンティティID (整数)
+- 例:
+```python
+entity_id = create_entity()
+```
+
+### add_tag(entity_id, tag)
+エンティティにタグを追加します。
+- 引数:
+  - entity_id: エンティティID (整数)
+  - tag: タグ名 (文字列)
+- 戻り値: なし
+- 例:
+```python
+add_tag(entity_id, "bullet")
+```
+
+### find_entities_by_tag(tag)
+指定したタグを持つすべてのエンティティを検索します。
+- 引数:
+  - tag: タグ名 (文字列)
+- 戻り値: エンティティIDのリスト
+- 例:
+```python
+bullets = find_entities_by_tag("bullet")
+```
+
+## コンポーネント管理
+
+### add_component(entity_id, component_type, properties)
+エンティティにコンポーネントを追加します。
+- 引数:
+  - entity_id: エンティティID (整数)
+  - component_type: コンポーネントの種類 (文字列)
+  - properties: コンポーネントのプロパティ (辞書)
+- 戻り値: なし
+- サポートされているコンポーネントタイプ:
+  - "transform": 位置情報
+  - "sprite": 描画情報
+  - "text": テキスト表示
+  - "physics": 物理演算
+- 例:
+```python
+# Transform コンポーネント
+add_component(entity_id, "transform", {
+    "x": 100,
+    "y": 200
+})
+
+# Sprite コンポーネント
+add_component(entity_id, "sprite", {
+    "width": 32,
+    "height": 32,
+    "color": "white"  # "white" または "cyan" がサポート
+})
+
+# Text コンポーネント
+add_component(entity_id, "text", {
+    "text": "Hello, World!",
+    "x": 100,
+    "y": 100
+})
+
+# Physics コンポーネント
+add_component(entity_id, "physics", {
+    "velocity_x": 0,
+    "velocity_y": -300.0,
+    "gravity": 0.0
+})
+```
+
+### get_component(entity_id, component_type)
+エンティティのコンポーネントを取得します。
+- 引数:
+  - entity_id: エンティティID (整数)
+  - component_type: コンポーネントの種類 (文字列)
+- 戻り値: コンポーネントのプロパティ (辞書) または None
+- 例:
+```python
+transform = get_component(entity_id, "transform")
+if transform:
+    x = transform["x"]
+    y = transform["y"]
+```
+
+### set_component(entity_id, component_type, properties)
+エンティティのコンポーネントのプロパティを更新します。
+- 引数:
+  - entity_id: エンティティID (整数)
+  - component_type: コンポーネントの種類 (文字列)
+  - properties: 更新するプロパティ (辞書)
+- 戻り値: なし
+- 例:
+```python
+set_component(entity_id, "transform", {
+    "x": new_x,
+    "y": new_y
+})
+```
+
+## 入力管理
+
+### is_key_pressed(key)
+指定したキーが押されているかを確認します。
+- 引数:
+  - key: キー名 (文字列)
+- 戻り値: 真偽値
+- サポートされているキー:
+  - "Space": スペースキー
+  - "ArrowLeft": 左矢印キー
+  - "ArrowRight": 右矢印キー
+  - "ArrowUp": 上矢印キー
+  - "ArrowDown": 下矢印キー
+- 例:
+```python
+if is_key_pressed("Space"):
+    # スペースキーが押された時の処理
+```
+
+## システム情報
+
+### get_total_entities()
+アクティブなエンティティの総数を取得します。
+- 引数: なし
+- 戻り値: エンティティの数 (整数)
+- 例:
+```python
+total = get_total_entities()
+```
+
+## デバッグ
+
+### print(*args)
+デバッグ情報を出力します。
+- 引数: 任意の数の引数
+- 戻り値: なし
+- 例:
+```python
+print("Debug:", value)
+```
 
 ## 基本機能
 
@@ -144,4 +290,32 @@ play_bgm("bgm", loop=True)
 
 4. イベントハンドラーは非同期で実行される可能性があるため、状態の変更には注意が必要です。
 
-5. タイマー関数は非同期で実行されます。メインスレッドの処理をブロックしないようにしてください。 
+5. タイマー関数は非同期で実行されます。メインスレッドの処理をブロックしないようにしてください。
+
+## 状態管理
+
+### set_state(entity_id, key, value)
+エンティティの状態値を設定します。
+- 引数:
+  - entity_id: エンティティID（整数）
+  - key: 状態のキー（文字列）
+  - value: 設定する値（数値、文字列、真偽値）
+- 戻り値: なし
+- 例:
+```python
+set_state(player_id, "health", 100)
+set_state(player_id, "name", "Player 1")
+```
+
+### get_state(entity_id, key)
+エンティティの状態値を取得します。
+- 引数:
+  - entity_id: エンティティID（整数）
+  - key: 状態のキー（文字列）
+- 戻り値: 保存された値またはNone
+- 例:
+```python
+health = get_state(player_id, "health")
+if health > 0:
+    # プレイヤーが生存している場合の処理
+``` 

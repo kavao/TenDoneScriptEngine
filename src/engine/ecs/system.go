@@ -74,4 +74,8 @@ func (s *BaseSystem) HasRequiredComponents(entity *Entity) bool {
 		}
 	}
 	return true
+}
+
+func (s *BaseSystem) Entities() []*Entity {
+	return s.entities
 } 

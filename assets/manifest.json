@@ -5,7 +5,14 @@
     },
     "background": {
       "path": "images/backgrounds/title.png"
-    }
+    },
+    "player_idle_1": { "path": "images/player/idle_1.png" },
+    "player_idle_2": { "path": "images/player/idle_2.png" },
+    "player_walk_1": { "path": "images/player/walk_1.png" },
+    "player_walk_2": { "path": "images/player/walk_2.png" },
+    "player_walk_3": { "path": "images/player/walk_3.png" },
+    "player_walk_4": { "path": "images/player/walk_4.png" },
+    "player_jump": { "path": "images/player/jump.png" }
   },
   "audio": {
     "bgm_title": {
@@ -19,7 +26,7 @@
   },
   "fonts": {
     "main": {
-      "path": "fonts/NotoSansJP-Regular.ttf",
+      "path": "fonts/mplus1p.ttf",
       "size": 18
     },
     "title": {

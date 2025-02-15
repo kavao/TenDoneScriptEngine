@@ -13,9 +13,9 @@ var nextEntityID uint64
 // エンティティ
 type Entity struct {
 	id         EntityID
+	world      *World
 	components map[ComponentID]Component
 	mutex      sync.RWMutex
-	world      *World
 	active     bool
 	tags       map[string]bool
 }
@@ -71,8 +71,9 @@ func (e *Entity) HasComponent(id ComponentID) bool {
 
 // タグの追加
 func (e *Entity) AddTag(tag string) {
-	e.mutex.Lock()
-	defer e.mutex.Unlock()
+	if e.tags == nil {
+		e.tags = make(map[string]bool)
+	}
 	e.tags[tag] = true
 }
 
@@ -87,7 +88,15 @@ func (e *Entity) RemoveTag(tag string) {
 func (e *Entity) HasTag(tag string) bool {
 	e.mutex.RLock()
 	defer e.mutex.RUnlock()
-	return e.tags[tag]
+	value, exists := e.tags[tag]
+	return exists && value
+}
+
+// デバッグ用に追加
+func (e *Entity) GetTags() map[string]bool {
+	e.mutex.RLock()
+	defer e.mutex.RUnlock()
+	return e.tags
 }
 
 // エンティティの無効化
@@ -114,4 +123,8 @@ func (e *Entity) IsActive() bool {
 // エンティティIDの取得
 func (e *Entity) GetID() EntityID {
 	return e.id
+}
+
+func (e *Entity) GetWorld() *World {
+	return e.world
 } 

@@ -1,17 +1,19 @@
 package ecs
 
 import (
+	"fmt"
 	"sort"
 	"sync"
 )
 
 // ワールド
 type World struct {
-	mutex    sync.RWMutex
-	entities map[EntityID]*Entity
-	systems  []System
-	toAdd    []*Entity
-	toRemove []EntityID
+	mutex     sync.RWMutex
+	entities  map[EntityID]*Entity  // マップを使用してエンティティを保存
+	systems   []System
+	toAdd     []*Entity
+	toRemove  []EntityID
+	nextEntityID EntityID
 }
 
 func NewWorld() *World {
@@ -25,8 +27,18 @@ func NewWorld() *World {
 
 // エンティティの作成
 func (w *World) CreateEntity() *Entity {
-	entity := NewEntity(w)
-	w.toAdd = append(w.toAdd, entity)
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+
+	entity := &Entity{
+		id:         w.nextEntityID,
+		world:      w,
+		components: make(map[ComponentID]Component),
+		tags:       make(map[string]bool),
+		active:     true,
+	}
+	w.entities[entity.GetID()] = entity  // 即座にマップに追加
+	w.nextEntityID++
 	return entity
 }
 
@@ -92,9 +104,22 @@ func (w *World) Update(dt float64) error {
 }
 
 // コンポーネントが追加された時の処理
-func (w *World) entityComponentAdded(entity *Entity, _ Component) {
+func (w *World) entityComponentAdded(entity *Entity, component Component) {
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+
 	for _, system := range w.systems {
-		if system.HasRequiredComponents(entity) {
+		// エンティティがすでにロックされているので、HasComponentの代わりに
+		// 直接コンポーネントの存在チェックを行う
+		hasAllComponents := true
+		for _, requiredID := range system.GetRequiredComponents() {
+			if _, exists := entity.components[requiredID]; !exists {
+				hasAllComponents = false
+				break
+			}
+		}
+		
+		if hasAllComponents {
 			system.OnEntityAdded(entity)
 		}
 	}
@@ -114,13 +139,15 @@ func (w *World) FindEntitiesByTag(tag string) []*Entity {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
 
-	var result []*Entity
+	var entities []*Entity
 	for _, entity := range w.entities {
+		fmt.Printf("Checking entity %d for tag '%s': active=%v, hasTag=%v\n",
+			entity.GetID(), tag, entity.IsActive(), entity.HasTag(tag))
 		if entity.IsActive() && entity.HasTag(tag) {
-			result = append(result, entity)
+			entities = append(entities, entity)
 		}
 	}
-	return result
+	return entities
 }
 
 // エンティティの取得
@@ -128,4 +155,31 @@ func (w *World) GetEntity(id EntityID) *Entity {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
 	return w.entities[id]
+}
+
+// 非アクティブなエンティティを削除
+func (w *World) CleanupInactiveEntities() {
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+
+	// 非アクティブなエンティティを削除
+	for id, entity := range w.entities {
+		if !entity.IsActive() {
+			delete(w.entities, id)
+		}
+	}
+}
+
+// アクティブなエンティティの総数を取得
+func (w *World) GetTotalEntities() int {
+	w.mutex.RLock()
+	defer w.mutex.RUnlock()
+
+	count := 0
+	for _, entity := range w.entities {
+		if entity.IsActive() {
+			count++
+		}
+	}
+	return count
 }
