@@ -1,14 +1,14 @@
 package components
 
 import (
-	"gameengine/src/engine/ecs"
+	core "gameengine/src/engine/ecs/core"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type SpriteComponent struct {
-	entity *ecs.Entity
+	entity *core.Entity
 	Image  string
 	Sprite *ebiten.Image
 	Width  int
@@ -17,15 +17,15 @@ type SpriteComponent struct {
 	Color  color.Color
 }
 
-func (c *SpriteComponent) GetEntity() *ecs.Entity {
+func (c *SpriteComponent) GetEntity() *core.Entity {
 	return c.entity
 }
 
-func (c *SpriteComponent) SetEntity(e *ecs.Entity) {
+func (c *SpriteComponent) SetEntity(e *core.Entity) {
 	c.entity = e
 }
 
-func (c *SpriteComponent) GetID() ecs.ComponentID {
+func (c *SpriteComponent) GetID() core.ComponentID {
 	return 2 // SpriteComponentのID
 }
 

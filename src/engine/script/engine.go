@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	"gameengine/src/engine/components"
-	"gameengine/src/engine/ecs"
+	"gameengine/src/engine/ecs/components"
+	"gameengine/src/engine/ecs/core"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -21,14 +21,14 @@ import (
 // スクリプトエンジン
 type ScriptEngine struct {
 	mutex        sync.RWMutex
-	world        *ecs.World
+	world        *core.World
 	thread       *starlark.Thread
 	globals      starlark.StringDict
 	scriptDir    string
 	stateManager *StateManager
 }
 
-func NewScriptEngine(world *ecs.World, scriptDir string) *ScriptEngine {
+func NewScriptEngine(world *core.World, scriptDir string) *ScriptEngine {
 	engine := &ScriptEngine{
 		world:        world,
 		thread:       &starlark.Thread{Name: "game"},
@@ -211,6 +211,30 @@ func (e *ScriptEngine) registerBuiltins() {
 
 		return globals, nil
 	}
+
+	e.registerFunctions(e.thread, e.globals)
+}
+
+func (e *ScriptEngine) registerFunctions(thread *starlark.Thread, predeclared starlark.StringDict) {
+	predeclared["set_screen_resolution"] = starlark.NewBuiltin("set_screen_resolution", func(thread *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+		var preset string
+		if err := starlark.UnpackPositionalArgs(b.Name(), args, kwargs, 1, &preset); err != nil {
+			return nil, err
+		}
+
+		fmt.Printf("Setting screen resolution to: %s\n", preset)
+		// スクリーン設定エンティティを探す
+		entities := e.world.FindEntitiesByTag("screen_config")
+		fmt.Printf("Found %d screen config entities\n", len(entities))
+		if len(entities) > 0 {
+			if config := entities[0].GetComponent(4).(*components.ScreenConfigComponent); config != nil {
+				config.SetResolution(preset)
+				fmt.Printf("Updated resolution to: %dx%d\n", config.Width, config.Height)
+			}
+		}
+
+		return starlark.None, nil
+	})
 }
 
 // エンティティ作成
@@ -237,7 +261,7 @@ func (e *ScriptEngine) addComponent(thread *starlark.Thread, b *starlark.Builtin
 		}
 	}
 
-	entity := e.world.GetEntity(ecs.EntityID(entityID))
+	entity := e.world.GetEntity(core.EntityID(entityID))
 	if entity == nil {
 		fmt.Printf("Failed to get entity ID: %d (created from createEntity)\n", entityID)
 		return nil, fmt.Errorf("entity not found: %d", entityID)
@@ -341,13 +365,13 @@ func (e *ScriptEngine) getComponent(thread *starlark.Thread, b *starlark.Builtin
 		return nil, err
 	}
 
-	entity := e.world.GetEntity(ecs.EntityID(entityID))
+	entity := e.world.GetEntity(core.EntityID(entityID))
 	if entity == nil {
 		fmt.Printf("Entity %d not found in World %p\n", entityID, e.world)
 		return starlark.None, nil
 	}
 
-	var componentID ecs.ComponentID
+	var componentID core.ComponentID
 	switch componentType {
 	case "transform":
 		componentID = 1
@@ -413,7 +437,7 @@ func (e *ScriptEngine) addTag(thread *starlark.Thread, b *starlark.Builtin, args
 		return nil, err
 	}
 
-	entity := e.world.GetEntity(ecs.EntityID(entityID))
+	entity := e.world.GetEntity(core.EntityID(entityID))
 	if entity == nil {
 		return nil, fmt.Errorf("entity not found: %d", entityID)
 	}
@@ -486,7 +510,7 @@ func (e *ScriptEngine) setComponent(thread *starlark.Thread, b *starlark.Builtin
 		return nil, err
 	}
 
-	entity := e.world.GetEntity(ecs.EntityID(entityID))
+	entity := e.world.GetEntity(core.EntityID(entityID))
 	if entity == nil {
 		// エンティティが見つからない場合はNoneを返す
 		return starlark.None, nil
@@ -563,7 +587,7 @@ func (e *ScriptEngine) setState(thread *starlark.Thread, b *starlark.Builtin, ar
 		// 必要に応じて他の型も追加
 	}
 
-	e.stateManager.SetState(ecs.EntityID(entityID), key, goValue)
+	e.stateManager.SetState(core.EntityID(entityID), key, goValue)
 	return starlark.None, nil
 }
 
@@ -574,7 +598,7 @@ func (e *ScriptEngine) getState(thread *starlark.Thread, b *starlark.Builtin, ar
 		return nil, err
 	}
 
-	state := e.stateManager.GetState(ecs.EntityID(entityID), key)
+	state := e.stateManager.GetState(core.EntityID(entityID), key)
 	if state == nil {
 		return starlark.None, nil
 	}
@@ -627,7 +651,7 @@ func (e *ScriptEngine) setStates(thread *starlark.Thread, b *starlark.Builtin, a
 		states[string(key)] = value
 	}
 
-	e.stateManager.SetStates(ecs.EntityID(entityID), states)
+	e.stateManager.SetStates(core.EntityID(entityID), states)
 	return starlark.None, nil
 }
 
@@ -649,7 +673,7 @@ func (e *ScriptEngine) getStates(thread *starlark.Thread, b *starlark.Builtin, a
 	}
 
 	// 状態を取得
-	states := e.stateManager.GetStates(ecs.EntityID(entityID), keys)
+	states := e.stateManager.GetStates(core.EntityID(entityID), keys)
 
 	// 結果をStarlark辞書に変換
 	result := starlark.NewDict(len(states))

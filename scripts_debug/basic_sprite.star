@@ -28,8 +28,8 @@ def update():
     if is_key_pressed("ArrowRight"):
         x += speed
         moved = True
-        if x > 800-32:
-            x = 800-32
+        if x > 1280-32:  # HD幅に合わせて調整
+            x = 1280-32
             
     if is_key_pressed("ArrowUp"):
         y -= speed
@@ -40,8 +40,8 @@ def update():
     if is_key_pressed("ArrowDown"):
         y += speed
         moved = True
-        if y > 600-32:
-            y = 600-32
+        if y > 720-32:  # HD高さに合わせて調整
+            y = 720-32
 
     if moved:
         set_component(vars["player_id"], "transform", {
@@ -74,16 +74,16 @@ def update():
         vars["stats_text_id"] = create_entity()
         add_component(vars["stats_text_id"], "text", {
             "text": "",
-            "x": 600,
-            "y": 550
+            "x": 1000,  # HD幅に合わせて調整
+            "y": 650    # HD高さに合わせて調整
         })
 
     # 毎フレーム統計情報を更新
     stats_text = "Objects: " + str(total_entities) + " | Bullets: " + str(len(bullets))
     set_component(vars["stats_text_id"], "text", {
         "text": stats_text,
-        "x": 600,
-        "y": 550
+        "x": 1000,  # HD幅に合わせて調整
+        "y": 650    # HD高さに合わせて調整
     })
 
 print("Update function defined") # デバッグ出力
@@ -128,16 +128,16 @@ def get_bullets():
 print("Starting initialization") # デバッグ出力
 
 def init():
-    # 画面設定の初期化
-    init_screen("FULLHD")
+    # 初期化時にFull HDに変更
+    # set_screen_resolution("FULL_HD")
     # プレイヤーエンティティの作成
     vars["player_id"] = create_entity()
     print("Created player entity:", vars["player_id"])
 
     # Transformコンポーネントの追加
     add_component(vars["player_id"], "transform", {
-        "x": 400,
-        "y": 500
+        "x": 600,  # HD幅の中央付近
+        "y": 600   # HD高さの下部
     })
     
     # Spriteコンポーネントの追加

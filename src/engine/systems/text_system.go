@@ -1,8 +1,9 @@
 package systems
 
 import (
-	"gameengine/src/engine/components"
 	"gameengine/src/engine/ecs"
+	"gameengine/src/engine/ecs/components"
+	"gameengine/src/engine/ecs/core"
 	"image/color"
 	"os"
 
@@ -15,17 +16,16 @@ import (
 
 type TextSystem struct {
 	*ecs.BaseSystem
-	screen *ebiten.Image
-	font   font.Face
+	screen    *ebiten.Image
+	font      font.Face
+	textCache map[string]*ebiten.Image
 }
 
 func NewTextSystem() *TextSystem {
-	// 日本語フォントの読み込み
 	fontData, err := os.ReadFile("assets/fonts/NotoSansJP-Regular.ttf")
 	if err != nil {
-		// エラー時は基本フォントにフォールバック
 		return &TextSystem{
-			BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender+1, []ecs.ComponentID{3}),
+			BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender+1, []core.ComponentID{3}),
 			font:       basicfont.Face7x13,
 		}
 	}
@@ -33,26 +33,28 @@ func NewTextSystem() *TextSystem {
 	tt, err := opentype.Parse(fontData)
 	if err != nil {
 		return &TextSystem{
-			BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender+1, []ecs.ComponentID{3}),
+			BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender+1, []core.ComponentID{3}),
 			font:       basicfont.Face7x13,
 		}
 	}
 
+	const dpi = 72
 	face, err := opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    16,
-		DPI:     72,
+		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
 	if err != nil {
 		return &TextSystem{
-			BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender+1, []ecs.ComponentID{3}),
+			BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender+1, []core.ComponentID{3}),
 			font:       basicfont.Face7x13,
 		}
 	}
 
 	return &TextSystem{
-		BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender+1, []ecs.ComponentID{3}),
+		BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender+1, []core.ComponentID{3}),
 		font:       face,
+		textCache:  make(map[string]*ebiten.Image),
 	}
 }
 
@@ -67,9 +69,17 @@ func (s *TextSystem) Update(dt float64) error {
 			continue
 		}
 
-		text.Draw(s.screen, textComp.Text, s.font,
-			int(textComp.X), int(textComp.Y),
-			color.White)
+		img, exists := s.textCache[textComp.Text]
+		if !exists {
+			bounds := text.BoundString(s.font, textComp.Text)
+			img = ebiten.NewImage(bounds.Dx(), bounds.Dy())
+			text.Draw(img, textComp.Text, s.font, 0, -bounds.Min.Y, color.White)
+			s.textCache[textComp.Text] = img
+		}
+
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(textComp.X, textComp.Y)
+		s.screen.DrawImage(img, op)
 	}
 	return nil
 }

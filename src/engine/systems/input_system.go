@@ -2,6 +2,7 @@ package systems
 
 import (
 	"gameengine/src/engine/ecs"
+	"gameengine/src/engine/ecs/core"
 )
 
 type InputSystem struct {
@@ -10,7 +11,7 @@ type InputSystem struct {
 
 func NewInputSystem() *InputSystem {
 	return &InputSystem{
-		BaseSystem: ecs.NewBaseSystem(ecs.PriorityUpdate, []ecs.ComponentID{}), // 必要なコンポーネントなし
+		BaseSystem: ecs.NewBaseSystem(ecs.PriorityUpdate, []core.ComponentID{}), // 必要なコンポーネントなし
 	}
 }
 

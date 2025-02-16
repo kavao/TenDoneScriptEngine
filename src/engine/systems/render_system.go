@@ -1,8 +1,9 @@
 package systems
 
 import (
-	"gameengine/src/engine/components"
 	"gameengine/src/engine/ecs"
+	"gameengine/src/engine/ecs/components"
+	"gameengine/src/engine/ecs/core"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -14,15 +15,25 @@ type RenderSystem struct {
 
 func NewRenderSystem() *RenderSystem {
 	return &RenderSystem{
-		BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender, []ecs.ComponentID{1, 2}), // Transform と Sprite のID
+		BaseSystem: ecs.NewBaseSystem(ecs.PriorityRender, []core.ComponentID{1, 2}), // Transform と Sprite のID
 	}
 }
 
 func (s *RenderSystem) Update(dt float64) error {
+	//	fmt.Printf("RenderSystem Update: screen=%v\n", s.screen != nil)
 	if s.screen == nil {
 		return nil
 	}
 
+	// fmt.Printf("RenderSystem checking required components: %v\n", s.BaseSystem.GetRequiredComponents())
+	// for _, entity := range s.BaseSystem.Entities() {
+	// 	fmt.Printf("Entity %d components: %v\n", entity.ID, entity.Components)
+	// 	if s.BaseSystem.HasRequiredComponents(entity) {
+	// 		fmt.Printf("Entity %d has required components\n", entity.ID)
+	// 	}
+	// }
+
+	// fmt.Printf("RenderSystem entities: %d\n", len(s.BaseSystem.Entities()))
 	for _, entity := range s.BaseSystem.Entities() {
 		var transform *components.TransformComponent
 		var sprite *components.SpriteComponent

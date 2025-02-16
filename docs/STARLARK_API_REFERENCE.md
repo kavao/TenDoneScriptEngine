@@ -347,3 +347,21 @@ states = get_states(player_id, ["health", "score", "shot_cooldown"])
 if states["health"] > 0:
     print("Player health:", states["health"])
 ```
+
+### init_screen(mode)
+画面解像度を設定します。
+- 引数:
+  - mode: 解像度モード（文字列）
+    - "HD": 1280x720
+    - "FULLHD": 1920x1080
+- 戻り値: なし
+- 例:
+```python
+# HD解像度（1280x720）で設定
+init_screen("HD")
+
+# フルHD解像度（1920x1080）で設定
+init_screen("FULLHD")
+```
+
+注意: 解像度の変更は、ゲーム開始時に一度だけ行うことを推奨します。

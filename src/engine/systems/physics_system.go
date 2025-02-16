@@ -1,8 +1,9 @@
 package systems
 
 import (
-	"gameengine/src/engine/components"
 	"gameengine/src/engine/ecs"
+	"gameengine/src/engine/ecs/components"
+	"gameengine/src/engine/ecs/core"
 )
 
 type PhysicsSystem struct {
@@ -11,7 +12,7 @@ type PhysicsSystem struct {
 
 func NewPhysicsSystem() *PhysicsSystem {
 	return &PhysicsSystem{
-		BaseSystem: ecs.NewBaseSystem(ecs.PriorityPhysics, []ecs.ComponentID{1, 5}), // Transform と Physics
+		BaseSystem: ecs.NewBaseSystem(ecs.PriorityPhysics, []core.ComponentID{1, 5}), // Transform と Physics
 	}
 }
 
@@ -36,4 +37,4 @@ func (s *PhysicsSystem) Update(dt float64) error {
 		}
 	}
 	return nil
-} 
+}
