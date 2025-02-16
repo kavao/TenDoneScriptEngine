@@ -67,12 +67,19 @@ func (s *ScriptSelectorSystem) Update(dt float64) error {
 	for i, script := range s.scripts {
 		entity := s.world.CreateEntity()
 		textComp := components.NewTextComponent()
-		prefix := "  "
+
+		// プレフィックスの幅を統一
+		prefix := "[_] "
 		if i == s.selectedIndex {
-			prefix = "> "
+			prefix = "[o] "
 		}
-		textComp.Text = prefix + script
-		textComp.X = 100
+
+		// パスを短く表示するように変更
+		displayPath := filepath.Base(script)
+		textComp.Text = prefix + displayPath
+
+		// 表示位置を調整
+		textComp.X = 50
 		textComp.Y = 100 + float64(i*30)
 		entity.AddComponent(textComp)
 		s.textEntities = append(s.textEntities, entity.GetID())

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"gameengine/src/engine/ecs"
 	"gameengine/src/engine/ecs/components"
 	"gameengine/src/engine/ecs/core"
@@ -30,6 +31,7 @@ type Game struct {
 	scriptSelector   *systems.ScriptSelectorSystem
 	scriptSelected   chan string
 	isScriptSelected bool
+	fpsTextID        core.EntityID
 }
 
 func NewGame() *Game {
@@ -90,6 +92,15 @@ func main() {
 	world.AddSystem(textSystem)
 	world.AddSystem(physicsSystem)
 
+	// FPS表示用のテキストエンティティを作成
+	fpsEntity := game.world.CreateEntity()
+	fpsTextComp := components.NewTextComponent()
+	fpsTextComp.X = 10
+	fpsTextComp.Y = float64(game.screenHeight - 30) // 画面左下
+	fpsTextComp.Text = "FPS: --"
+	fpsEntity.AddComponent(fpsTextComp)
+	game.fpsTextID = fpsEntity.GetID()
+
 	// ウィンドウ設定
 	ebiten.SetWindowTitle("Game")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
@@ -141,6 +152,13 @@ func (g *Game) Update() error {
 	if g.cleanupCounter >= 60 { // 1秒ごとにクリーンアップ
 		g.world.CleanupInactiveEntities()
 		g.cleanupCounter = 0
+	}
+
+	// FPS表示の更新
+	if fpsEntity := g.world.GetEntity(g.fpsTextID); fpsEntity != nil {
+		if textComp := fpsEntity.GetComponent(3).(*components.TextComponent); textComp != nil {
+			textComp.Text = fmt.Sprintf("FPS: %.1f", ebiten.CurrentFPS())
+		}
 	}
 
 	return nil
