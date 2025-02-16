@@ -82,7 +82,7 @@ func (c *BaseComponent) SetEntity(entity *Entity) {
 func (c *BaseComponent) OnAdd()    {}
 func (c *BaseComponent) OnRemove() {}
 
-var DebugMode = false  // パッケージレベルで定義
+var DebugMode = false // パッケージレベルで定義
 
 // World structのメソッド
 func (w *World) Update(dt float64) error {
@@ -100,7 +100,7 @@ func (w *World) Update(dt float64) error {
 			delete(w.Entities, id)
 			systems := w.Systems
 			w.Mutex.Unlock()
-			
+
 			for _, system := range systems {
 				system.OnEntityRemoved(entity)
 			}
@@ -115,7 +115,7 @@ func (w *World) Update(dt float64) error {
 		w.Entities[entity.GetID()] = entity
 		systems := w.Systems // コピーを作成
 		w.Mutex.Unlock()
-		
+
 		for _, system := range systems {
 			if system.HasRequiredComponents(entity) {
 				system.OnEntityAdded(entity)
@@ -170,7 +170,7 @@ func (e *Entity) AddComponent(component Component) {
 	if DebugMode {
 		fmt.Printf("Added component %d to entity %d\n", id, e.ID)
 	}
-	
+
 	e.World.Mutex.Lock()
 	for _, system := range e.World.Systems {
 		if system.HasRequiredComponents(e) {
@@ -298,5 +298,15 @@ func (w *World) CleanupInactiveEntities() {
 		if !entity.IsActive() {
 			delete(w.Entities, id)
 		}
+	}
+}
+
+func (w *World) DestroyEntity(id EntityID) {
+	// 単一のロックで処理
+	w.Mutex.Lock()
+	defer w.Mutex.Unlock()
+
+	if entity, exists := w.Entities[id]; exists {
+		entity.Active = false
 	}
 }

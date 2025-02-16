@@ -1,11 +1,17 @@
-# 2Dゲームエンジン EbiTendon
+# Game Engine
 
-シンプルで拡張可能な2Dゲーム開発エンジンです。Ebitenをベースに、ECSアーキテクチャとStarlarkスクリプティングを採用しています。
+シンプルなECSベースのゲームエンジン
 
 ## 特徴
 
-- ECSベースのゲームロジック
-- Starlarkによるスクリプティング
+- ECSアーキテクチャ
+- Starlarkスクリプティング
+- 解像度設定のサポート（HD, Full HD, SD, モバイル）
+- コンポーネントベースの設計
+- 物理演算システム
+- テキストレンダリング（日本語対応）
+
+## 予定
 - シーン管理システム
 - UIコンポーネント
 - オーディオ管理
@@ -13,76 +19,40 @@
 - 衝突判定
 - ステートマシン
 - アセット管理
+  
+## 使用方法
 
-## 必要条件
-
-- Go 1.20以上
-
-## クイックスタート
-
-1. プロジェクトのダウンロード:
-```bash
-git clone [リポジトリURL]
-cd ebitendon
-```
-
-2. ゲームの実行:
+1. 実行:
 ```bash
 go run src/main.go
 ```
 
-## ゲーム開発の始め方
+2. デバッグモードで実行:
+```bash
+go run src/main.go -debug
+```
 
-1. スクリプトの編集 (`scripts/main.star`):
+## スクリプティング
+
+ゲームロジックはStarlarkスクリプトで記述します。
+詳細なAPIリファレンスは[STARLARK_API_REFERENCE.md](docs/STARLARK_API_REFERENCE.md)を参照してください。
+
+### 基本的なスクリプト例:
+
 ```python
 def init():
-    # プレイヤーエンティティの作成
+    # HD解像度で初期化
+    set_screen_resolution("HD")
+    
+    # プレイヤーの作成
     player_id = create_entity()
-    add_component(player_id, "transform", {
-        "x": 100,
-        "y": 200
-    })
-    add_component(player_id, "sprite", {
-        "image": "player"
-    })
+    add_component(player_id, "transform", {"x": 100, "y": 100})
+    add_component(player_id, "sprite", {"width": 32, "height": 32})
 
-init()
+def update():
+    # ゲームループの更新処理
+    pass
 ```
-
-2. アセットの追加:
-- 画像を `assets/images/` に配置
-- 音声を `assets/audio/` に配置
-- フォントを `assets/fonts/` に配置
-
-3. アセットマニフェストの更新 (`assets/manifest.json`):
-```json
-{
-  "images": {
-    "player": {
-      "path": "images/player.png"
-    }
-  }
-}
-```
-
-## デフォルトで含まれる機能
-
-### 基本システム
-- ウィンドウ管理（800x600、タイトル "Game"）
-- 基本的なECS実装
-- アセット管理システム
-- 簡単なUIシステム
-
-### サンプルコンテンツ
-- 基本的なメッセージウィンドウ
-- シンプルなタイトル画面
-- デバッグコンソール（`~`キーで表示）
-
-## 注意事項
-
-- フォントファイルは`src/engine/font/assets/`に配置済み
-- アセットマニフェスト（`assets/manifest.json`）でリソースを管理
-- 開発中のため、APIは変更される可能性があります
 
 ## ライセンス
 

@@ -469,11 +469,13 @@ func (e *ScriptEngine) isKeyPressed(thread *starlark.Thread, b *starlark.Builtin
 		return nil, fmt.Errorf("unknown key: %s", keyName)
 	}
 
-	result := ebiten.IsKeyPressed(key)
-	// if result {
+	// キー入力の状態を直接チェック
+	isPressed := ebiten.IsKeyPressed(key)
+	// デバッグ出力を追加
+	// if isPressed {
 	// 	fmt.Printf("Key %s is pressed\n", keyName)
 	// }
-	return starlark.Bool(result), nil
+	return starlark.Bool(isPressed), nil
 }
 
 // update関数の呼び出し

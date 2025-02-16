@@ -2,28 +2,27 @@ package script
 
 import (
 	"fmt"
-	"os"
+	"io/ioutil"
 	"path/filepath"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 )
 
-func ShowScriptSelector(debugDir string) (string, error) {
-	// デバッグディレクトリ内の.starファイルを検索
+func ShowScriptSelector(dir string) (string, error) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return "", err
+	}
+
 	var scripts []string
-	err := filepath.Walk(debugDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && filepath.Ext(path) == ".star" {
+	for _, f := range files {
+		// アンダースコアで始まるファイルを除外
+		if !f.IsDir() && strings.HasSuffix(f.Name(), ".star") && !strings.HasPrefix(f.Name(), "_") {
 			// パスの区切り文字を'/'に統一
-			path = filepath.ToSlash(path)
+			path := filepath.ToSlash(filepath.Join(dir, f.Name()))
 			scripts = append(scripts, path)
 		}
-		return nil
-	})
-	if err != nil {
-		return "", fmt.Errorf("failed to list debug scripts: %v", err)
 	}
 
 	// スクリプトが見つからない場合はデフォルトを使用

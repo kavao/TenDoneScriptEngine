@@ -50,7 +50,6 @@ func (s *ScreenConfigSystem) Update(dt float64) error {
 
 			fmt.Printf("Window size set to: %dx%d\n", config.Width, config.Height)
 		}
-		return nil
 	}
 	return nil
 }

@@ -5,7 +5,7 @@
 ### create_entity()
 新しいエンティティを作成します。
 - 引数: なし
-- 戻り値: エンティティID (整数)
+- 戻り値: エンティティID（整数）
 - 例:
 ```python
 entity_id = create_entity()
@@ -14,8 +14,8 @@ entity_id = create_entity()
 ### add_tag(entity_id, tag)
 エンティティにタグを追加します。
 - 引数:
-  - entity_id: エンティティID (整数)
-  - tag: タグ名 (文字列)
+  - entity_id: エンティティID（整数）
+  - tag: タグ名（文字列）
 - 戻り値: なし
 - 例:
 ```python
@@ -25,7 +25,7 @@ add_tag(entity_id, "bullet")
 ### find_entities_by_tag(tag)
 指定したタグを持つすべてのエンティティを検索します。
 - 引数:
-  - tag: タグ名 (文字列)
+  - tag: タグ名（文字列）
 - 戻り値: エンティティIDのリスト
 - 例:
 ```python
@@ -37,9 +37,9 @@ bullets = find_entities_by_tag("bullet")
 ### add_component(entity_id, component_type, properties)
 エンティティにコンポーネントを追加します。
 - 引数:
-  - entity_id: エンティティID (整数)
-  - component_type: コンポーネントの種類 (文字列)
-  - properties: コンポーネントのプロパティ (辞書)
+  - entity_id: エンティティID（整数）
+  - component_type: コンポーネントの種類（文字列）
+  - properties: コンポーネントのプロパティ（辞書）
 - 戻り値: なし
 - サポートされているコンポーネントタイプ:
   - "transform": 位置情報
@@ -79,9 +79,9 @@ add_component(entity_id, "physics", {
 ### get_component(entity_id, component_type)
 エンティティのコンポーネントを取得します。
 - 引数:
-  - entity_id: エンティティID (整数)
-  - component_type: コンポーネントの種類 (文字列)
-- 戻り値: コンポーネントのプロパティ (辞書) または None
+  - entity_id: エンティティID（整数）
+  - component_type: コンポーネントの種類（文字列）
+- 戻り値: コンポーネントのプロパティ（辞書）またはNone
 - 例:
 ```python
 transform = get_component(entity_id, "transform")
@@ -93,9 +93,9 @@ if transform:
 ### set_component(entity_id, component_type, properties)
 エンティティのコンポーネントのプロパティを更新します。
 - 引数:
-  - entity_id: エンティティID (整数)
-  - component_type: コンポーネントの種類 (文字列)
-  - properties: 更新するプロパティ (辞書)
+  - entity_id: エンティティID（整数）
+  - component_type: コンポーネントの種類（文字列）
+  - properties: 更新するプロパティ（辞書）
 - 戻り値: なし
 - 例:
 ```python
@@ -110,7 +110,7 @@ set_component(entity_id, "transform", {
 ### is_key_pressed(key)
 指定したキーが押されているかを確認します。
 - 引数:
-  - key: キー名 (文字列)
+  - key: キー名（文字列）
 - 戻り値: 真偽値
 - サポートされているキー:
   - "Space": スペースキー
@@ -129,7 +129,7 @@ if is_key_pressed("Space"):
 ### get_total_entities()
 アクティブなエンティティの総数を取得します。
 - 引数: なし
-- 戻り値: エンティティの数 (整数)
+- 戻り値: エンティティの数（整数）
 - 例:
 ```python
 total = get_total_entities()
@@ -348,20 +348,23 @@ if states["health"] > 0:
     print("Player health:", states["health"])
 ```
 
-### init_screen(mode)
+### set_screen_resolution(mode)
 画面解像度を設定します。
 - 引数:
   - mode: 解像度モード（文字列）
     - "HD": 1280x720
-    - "FULLHD": 1920x1080
+    - "FULL_HD": 1920x1080
+    - "SD": 800x600
+    - "MOBILE": 360x640
+    - "MOBILE_L": 640x360
 - 戻り値: なし
 - 例:
 ```python
 # HD解像度（1280x720）で設定
-init_screen("HD")
+set_screen_resolution("HD")
 
 # フルHD解像度（1920x1080）で設定
-init_screen("FULLHD")
+set_screen_resolution("FULL_HD")
 ```
 
 注意: 解像度の変更は、ゲーム開始時に一度だけ行うことを推奨します。

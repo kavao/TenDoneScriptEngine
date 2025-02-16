@@ -175,7 +175,7 @@ def init():
 
 print("Initialization complete")
 # 設定の読み込み
-load("scripts_debug/config.star", "init_screen")  # 必要な関数だけをインポート
+load("scripts_debug/_config.star", "init_screen")  # パスを更新
 init()  # init()を直接呼び出す 
 
 # オブジェクトの状態を設定
